@@ -1,0 +1,2 @@
+# Validated against the frozen final artifact.
+/opt/homebrew/bin/cmake --build build-cs320 --target mlek_object_detection --parallel 4

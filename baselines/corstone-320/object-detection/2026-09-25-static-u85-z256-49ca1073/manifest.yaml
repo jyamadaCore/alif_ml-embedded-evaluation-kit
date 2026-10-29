@@ -1,0 +1,111 @@
+schema_version: 1
+baseline_id: 2026-09-25-static-u85-z256-49ca1073
+created_date: 2026-09-25
+status: known-good-static
+payload_root: ../../../../build-baselines/corstone-320/object-detection/2026-09-25-static-u85-z256-49ca1073
+
+source:
+  repository: alif_ml-embedded-evaluation-kit
+  head: 49ca1073718f7f2cbb88610d5ca84fd47f2a4017
+  short_head: 49ca1073
+  commit_date: "2026-09-21T14:17:38+03:00"
+  commit_subject: "Merge pull request #32 from alifsemi/update_dfp_pre221"
+  working_tree: dirty
+  staged_changes: false
+  modified_files:
+    - scripts/cmake/configuration_options/cmsis_opts.cmake
+    - source/hal/CMakeLists.txt
+    - source/hal/include/hal.h
+    - source/hal/source/components/npu/ethosu_profiler.c
+    - source/hal/source/hal_pmu.c
+    - source/hal/source/platform/mps4/source/platform_drivers.c
+  patch: provenance/working-tree.patch
+  patch_sha256: a59ecc5459b2593f9ac5e6b67f3a0ffd8eae47ca9d0f3ba76c2c3257b8d880ba
+  submodules: provenance/submodules.txt
+  recursive_submodule_enumeration: incomplete
+
+build:
+  type: Release
+  generator: Unix Makefiles
+  project_version: 26.03.0
+  target_platform: mps4
+  target_subsystem: sse-320
+  processor: cortex-m85
+  framework: TensorFlowLiteMicro
+  use_case: object_detection
+  compiler: "Arm GNU Toolchain 15.2.Rel1 (GCC 15.2.1)"
+  cmsis_dsp_minimum_sources: true
+  interactive_mode: false
+  vsi_enabled: false
+
+npu:
+  architecture: Ethos-U85
+  macs_per_cycle: 256
+  config_id: Z256
+  target_config: ethos-U85-256
+  memory_mode: Dedicated_Sram
+  fast_cache_bytes: 393216
+  timing_adapter_enabled: true
+  timing_adapter_profile: ta_config_u85_sys_dram_low
+  base_address: "0x50004000"
+
+model:
+  filename: yolo-fastest_192_face_v4_vela_Z256.tflite
+  sha256: 471424c3172ce07ab2250abbae4dc330ee8fd7a5d2955b9fba95aef027524fec
+  size_bytes: 402512
+  input_shape: [1, 192, 192, 1]
+  input_type: int8
+  delegation:
+    operator_count: 1
+    operators: [ethos-u]
+    source: user-reported console output
+
+runtime_evidence:
+  expected_console_log: "console-log-2026-09-25T21_01_57*"
+  console_log_status: missing-pending-attachment
+  workload_result: four static images detected and clean exit
+  workload_result_source: user-reported console output
+  benchmark:
+    npu_active_cycles_per_inference: 18533
+    npu_total_cycles_per_inference: 19574
+    verification: user-reported-unverified
+
+artifacts:
+  - path: firmware/mlek_object_detection.axf
+    size_bytes: 11633200
+    sha256: 3ff23c747e546c9c0047709e28995d5bfbab094d7867c583baa5bb6028d81ca2
+  - path: firmware/mlek_object_detection.map
+    size_bytes: 1412045
+    sha256: 93e7dd65a3dfd3a905b6ac461150619e6740acc5fc669964c655e8d6bb361ecb
+  - path: sectors/images.txt
+    size_bytes: 788
+    sha256: e755c7ebbb4e756baf7d035c7f0ac98ee5ae388fa64bb280f79bd2a5a6ad4aa6
+  - path: sectors/boot.bin
+    size_bytes: 1984
+    load_address: "0x11000000"
+    sha256: 6e1a3279004472233a4cc154b9047bb88ba31dc818b5f2c76438cb79e11765b2
+  - path: sectors/bram.bin
+    size_bytes: 956324
+    load_address: "0x12000000"
+    sha256: 67d2fd2c4726722d257caff8bc4c8e532054d8503051e4fcc1d3cf237bacaf0b
+  - path: sectors/ddr.bin
+    size_bytes: 844880
+    load_address: "0x70000000"
+    sha256: 5c3b1f77670463f71048c57c21dbb0cae3f5fb0dc886c73f8144aad8cc796086
+  - path: model/yolo-fastest_192_face_v4_vela_Z256.tflite
+    size_bytes: 402512
+    sha256: 471424c3172ce07ab2250abbae4dc330ee8fd7a5d2955b9fba95aef027524fec
+  - path: model/yolo-fastest_192_face_v4_vela_Z256.tflite.cc
+    size_bytes: 2428708
+    sha256: 4dc7f0492c48e4ae1d934b8abd0185a249a671708f262456dd3539e19c642a28
+  - path: config/CMakeCache.txt
+    size_bytes: 50627
+    sha256: 80f2408cf6e39c45442443a8ca0ffab728c97a38a163849a130ef8710c31ee08
+  - path: config/timing_adapter_settings.h
+    size_bytes: 1986
+    sha256: 3ab97d21e2d94814252710d36fc61064a1e12039a13cfdf44d218b64fb72e39f
+
+limitations:
+  - Original console log is not available in the workspace.
+  - Recursive submodule status stalled; top-level pins are recorded.
+  - No external artifact-store URI is configured; the binary payload is local and ignored by Git.

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,7 +34,9 @@ extern "C" {
 #include "hal_display.h"        /* Display interface */
 #include "hal_audio.h"          /* Audio interface */
 #include "hal_camera.h"         /* Camera interface */
-#include "hal_audio_alif.h"     /* Alif AUDIO functions */
+#if defined(HAL_PLATFORM_ALIF)
+#include "hal_audio_alif.h"     /* Alif audio functions */
+#endif
 
 #include <inttypes.h>
 #include <stdbool.h>

@@ -61,16 +61,20 @@ bool hal_camera_init(void)
     hal_camera_reset();
     info("Initialising camera interface: %s\n", s_vsi_dev.name);
 
-    if (VideoDrv_Initialize(NULL) != VIDEO_DRV_OK) {
-        printf_err("Failed to initialise video driver\n");
-        return false;
-    }
-
-    /** Entries into the interrrupt table */
+    /** Entries into the interrupt table must be valid before VideoDrv_Initialize()
+     *  unmasks these IRQs at the NVIC below. VideoDrv_Initialize() enables IRQs
+     *  228-231 directly via NVIC->ISER; if that happens before the vector table
+     *  is populated, an interrupt pending in between vectors through an empty
+     *  slot. */
     NVIC_SetVector((IRQn_Type)ARM_VSI4_IRQn, (uint32_t)ARM_VSI4_Handler);
     NVIC_SetVector((IRQn_Type)ARM_VSI5_IRQn, (uint32_t)ARM_VSI4_Handler);
     NVIC_SetVector((IRQn_Type)ARM_VSI6_IRQn, (uint32_t)ARM_VSI4_Handler);
     NVIC_SetVector((IRQn_Type)ARM_VSI7_IRQn, (uint32_t)ARM_VSI4_Handler);
+
+    if (VideoDrv_Initialize(NULL) != VIDEO_DRV_OK) {
+        printf_err("Failed to initialise video driver\n");
+        return false;
+    }
 
     return true;
 }

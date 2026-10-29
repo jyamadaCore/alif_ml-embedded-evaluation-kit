@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its affiliates
+ * SPDX-FileCopyrightText: Copyright 2022, 2024-2026 Arm Limited and/or its affiliates
  * <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -202,8 +202,13 @@ ethosu_pmu_counters ethosu_get_pmu_counters(void)
     return *counters;
 }
 
-extern void platform_ethosu_inference_begin(void);
-extern void platform_ethosu_inference_end(void);
+void __attribute__((weak)) platform_ethosu_inference_begin(void)
+{
+}
+
+void __attribute__((weak)) platform_ethosu_inference_end(void)
+{
+}
 
 void ethosu_inference_begin(struct ethosu_driver* drv, void* userArg)
 {

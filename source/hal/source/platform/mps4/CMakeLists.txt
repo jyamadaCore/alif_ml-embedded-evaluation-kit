@@ -149,7 +149,7 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     platform_pmu
     hal_display_mps4
     hal_audio_static_streams
-    $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,hal_camera_static_images>
+    $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,$<IF:$<BOOL:${ETHERNET_CAMERA_ENABLED}>,hal_camera_ethernet,hal_camera_static_images>>
     $<$<NOT:$<BOOL:${SEMIHOSTING_ENABLED}>>:stdout_retarget_cmsdk>)
 
 # Set the CPU profiling definition

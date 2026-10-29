@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
+ * SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
  * affiliates <open-source-office@arm.com>
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -200,7 +200,7 @@ static int verify_platform(void)
 }
 
 static const struct hdlcd_dev_cfg_t HDLCD_DEV_CFG_S = {
-    .base = HDLCD_BASE_S,
+    .base = HDLCD_BASE_NS,
     .polarities = (POLARITIES_DATA_POLARITY_Msk |
                    POLARITIES_DATAEN_POLARITY_Msk |
                    POLARITIES_HSYNC_POLARITY_Pos),

@@ -1,0 +1,5 @@
+cmake: 4.1.1 (/opt/homebrew/bin/cmake)
+gmake: GNU Make 4.4.1, aarch64-apple-darwin23.4.0 (/opt/homebrew/bin/gmake)
+arm-none-eabi-gcc: Arm GNU Toolchain 15.2.Rel1, GCC 15.2.1 20251203 (/opt/homebrew/bin/arm-none-eabi-gcc)
+arm-none-eabi-g++: Arm GNU Toolchain 15.2.Rel1, GCC 15.2.1 20251203 (/opt/homebrew/bin/arm-none-eabi-g++)
+python: 3.12.9 (/opt/homebrew/bin/python3.12)

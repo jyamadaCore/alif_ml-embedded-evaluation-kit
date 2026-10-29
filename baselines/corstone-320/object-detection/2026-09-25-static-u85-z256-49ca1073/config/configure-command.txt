@@ -1,0 +1,9 @@
+# Reconstructed from the final CMake cache; the historically typed command was not recorded.
+/opt/homebrew/bin/cmake -S . -B build-cs320 \
+  -DCMAKE_TOOLCHAIN_FILE=scripts/cmake/toolchains/bare-metal-gcc.cmake \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DTARGET_PLATFORM=mps4 \
+  -DTARGET_SUBSYSTEM=sse-320 \
+  -DETHOS_U_NPU_ID=U85 \
+  -DUSE_CASE_BUILD=object_detection \
+  -DCMSIS_DSP_MIN_REQ_SRC_LIST=ON

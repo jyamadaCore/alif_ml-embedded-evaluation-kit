@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -45,7 +45,13 @@ USER_OPTION(CORTEX_DFP_SRC_PATH
     "${MLEK_DEPENDENCY_ROOT_DIR}/cortex-dfp"
     PATH)
 
+if (TARGET_PLATFORM STREQUAL "alif")
+    set(CMSIS_DSP_MIN_REQ_SRC_LIST_DEFAULT OFF)
+else()
+    set(CMSIS_DSP_MIN_REQ_SRC_LIST_DEFAULT ON)
+endif()
+
 USER_OPTION(CMSIS_DSP_MIN_REQ_SRC_LIST
     "Reduce compile time by only using required CMSIS-DSP sources"
-    OFF
+    ${CMSIS_DSP_MIN_REQ_SRC_LIST_DEFAULT}
     BOOL)

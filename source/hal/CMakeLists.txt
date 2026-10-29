@@ -9,7 +9,7 @@
 #  contact@alifsemi.com, or visit: https://alifsemi.com/license
 
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -67,15 +67,20 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/components/log)
 # Add platform_drivers target
 add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
 
-# Link time library targets:
+# Link platform-independent HAL dependencies.
 target_link_libraries(${HAL_TARGET}
     PRIVATE
         hal_log             # Logging functions
-    PUBLIC 
+    PUBLIC
         hal_display_iface   # Display interface
-        audio_iface         # Audio interface
         platform_drivers    # Platform drivers implementing the required interfaces
 )
+
+# The live-audio interface and PMU lifecycle hooks are specific to Alif targets.
+if (TARGET_PLATFORM STREQUAL "alif")
+    target_compile_definitions(${HAL_TARGET} PUBLIC HAL_PLATFORM_ALIF)
+    target_link_libraries(${HAL_TARGET} PUBLIC audio_iface)
+endif()
 
 # Add a simple test target to verify HAL boots. Exclude it
 # from `all` target to reduce noise.

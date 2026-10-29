@@ -226,6 +226,7 @@ Pull with: `git submodule update --init --recursive -j $(nproc)`
 - [Contributing](docs/sections/contributing.md) - DCO, copyright headers, code review process
 - [Customizing](docs/sections/customizing.md) - implementing custom ML applications
 - [Deployment](docs/sections/deployment.md) - running on FVP and MPS3/MPS4 hardware
+- [Alif E3 (Corstone-310) on Corellium Atlas](scripts/corellium/AGENT.md) - build and deploy runbook for Corellium Atlas `cs310` instances; see also the `corstone310-corellium-deploy` skill
 - [Memory considerations](docs/sections/memory_considerations.md) - memory layout and constraints
 - [Timing adapters](docs/sections/timing_adapters.md) - configuring memory bandwidth/latency simulation
 - [CMake presets](docs/sections/cmake_presets.md) - using CMakePresets.json for build configurations

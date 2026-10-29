@@ -63,6 +63,49 @@ if (${FVP_VSI_ENABLED})
     endif()
 endif()
 
+if (${ETHERNET_CAMERA_ENABLED})
+    if (NOT DEFINED DYNAMIC_IFM_BASE OR NOT DEFINED DYNAMIC_IFM_SIZE)
+        message(FATAL_ERROR "DYNAMIC_IFM_BASE and DYNAMIC_IFM_SIZE should be defined for ETHERNET_CAMERA_ENABLED")
+    endif()
+
+    # Address/size/IRQ of the custom "vMMIO entry" added in the Atlas
+    # instance's UI (Devices -> Add vMMIO entry). Defaults pick
+    # AHB_USER_0_BASE_NS (see peripheral_memmap.h) -- a genuinely unbacked
+    # expansion slot on this sse-320 memory map, confirmed by probing (see
+    # source/hal_camera_ethernet.c) -- and IRQ 60, inside a reserved,
+    # otherwise-unused range in peripheral_irqs.h. Override with
+    # -DVMMIO_CAMERA_BASE=/-DVMMIO_CAMERA_SIZE=/-DVMMIO_CAMERA_IRQ= if the
+    # instance's vMMIO entry was created with different values.
+    if (NOT DEFINED VMMIO_CAMERA_BASE)
+        set(VMMIO_CAMERA_BASE 0x40104000)
+    endif()
+    if (NOT DEFINED VMMIO_CAMERA_SIZE)
+        set(VMMIO_CAMERA_SIZE 0x20000)
+    endif()
+    if (NOT DEFINED VMMIO_CAMERA_IRQ)
+        set(VMMIO_CAMERA_IRQ 60)
+    endif()
+
+    # Create HAL camera Ethernet library: the video feed arrives from the
+    # Generic Linux instance over a custom vMMIO entry (see
+    # source/hal_camera_ethernet.c) rather than through a VSI peripheral.
+    add_library(hal_camera_ethernet STATIC EXCLUDE_FROM_ALL)
+    target_sources(hal_camera_ethernet PRIVATE
+        source/hal_camera_ethernet.c
+        source/ethernet/mem_probe.c)
+    target_include_directories(hal_camera_ethernet PRIVATE source)
+    target_link_libraries(hal_camera_ethernet PUBLIC
+        hal_camera_interface
+        hal_log
+        cmsis_device)
+    target_compile_definitions(hal_camera_ethernet PRIVATE
+        DYNAMIC_IFM_BASE=${DYNAMIC_IFM_BASE}
+        DYNAMIC_IFM_SIZE=${DYNAMIC_IFM_SIZE}
+        VMMIO_CAMERA_BASE=${VMMIO_CAMERA_BASE}
+        VMMIO_CAMERA_SIZE=${VMMIO_CAMERA_SIZE}
+        VMMIO_CAMERA_IRQ=${VMMIO_CAMERA_IRQ})
+endif()
+
 if (${TARGET_PLATFORM} STREQUAL alif)
     add_subdirectory(source/alif)
 endif()

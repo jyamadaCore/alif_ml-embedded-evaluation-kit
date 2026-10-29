@@ -1,0 +1,163 @@
+diff --git a/scripts/cmake/configuration_options/cmsis_opts.cmake b/scripts/cmake/configuration_options/cmsis_opts.cmake
+index 12e2fd91..fd2cc013 100644
+--- a/scripts/cmake/configuration_options/cmsis_opts.cmake
++++ b/scripts/cmake/configuration_options/cmsis_opts.cmake
+@@ -1,5 +1,5 @@
+ #----------------------------------------------------------------------------
+-#  SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
++#  SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
+ #  affiliates <open-source-office@arm.com>
+ #  SPDX-License-Identifier: Apache-2.0
+ #
+@@ -45,7 +45,13 @@ USER_OPTION(CORTEX_DFP_SRC_PATH
+     "${MLEK_DEPENDENCY_ROOT_DIR}/cortex-dfp"
+     PATH)
+ 
++if (TARGET_PLATFORM STREQUAL "alif")
++    set(CMSIS_DSP_MIN_REQ_SRC_LIST_DEFAULT OFF)
++else()
++    set(CMSIS_DSP_MIN_REQ_SRC_LIST_DEFAULT ON)
++endif()
++
+ USER_OPTION(CMSIS_DSP_MIN_REQ_SRC_LIST
+     "Reduce compile time by only using required CMSIS-DSP sources"
+-    OFF
++    ${CMSIS_DSP_MIN_REQ_SRC_LIST_DEFAULT}
+     BOOL)
+diff --git a/source/hal/CMakeLists.txt b/source/hal/CMakeLists.txt
+index 51981a43..fc375f49 100644
+--- a/source/hal/CMakeLists.txt
++++ b/source/hal/CMakeLists.txt
+@@ -9,7 +9,7 @@
+ #  contact@alifsemi.com, or visit: https://alifsemi.com/license
+ 
+ #----------------------------------------------------------------------------
+-#  SPDX-FileCopyrightText: Copyright 2022, 2025 Arm Limited and/or its
++#  SPDX-FileCopyrightText: Copyright 2022, 2025-2026 Arm Limited and/or its
+ #  affiliates <open-source-office@arm.com>
+ #  SPDX-License-Identifier: Apache-2.0
+ #
+@@ -67,16 +67,21 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/source/components/log)
+ # Add platform_drivers target
+ add_subdirectory(${PLATFORM_DRIVERS_DIR} ${CMAKE_BINARY_DIR}/platform_driver)
+ 
+-# Link time library targets:
++# Link platform-independent HAL dependencies.
+ target_link_libraries(${HAL_TARGET}
+     PRIVATE
+         hal_log             # Logging functions
+-    PUBLIC 
++    PUBLIC
+         hal_display_iface   # Display interface
+-        audio_iface         # Audio interface
+         platform_drivers    # Platform drivers implementing the required interfaces
+ )
+ 
++# The live-audio interface and PMU lifecycle hooks are specific to Alif targets.
++if (TARGET_PLATFORM STREQUAL "alif")
++    target_compile_definitions(${HAL_TARGET} PUBLIC HAL_PLATFORM_ALIF)
++    target_link_libraries(${HAL_TARGET} PUBLIC audio_iface)
++endif()
++
+ # Add a simple test target to verify HAL boots. Exclude it
+ # from `all` target to reduce noise.
+ if (COMMAND platform_custom_post_build)
+diff --git a/source/hal/include/hal.h b/source/hal/include/hal.h
+index ef38f58c..28281fbe 100644
+--- a/source/hal/include/hal.h
++++ b/source/hal/include/hal.h
+@@ -1,5 +1,5 @@
+ /*
+- * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2025 Arm Limited and/or its
++ * SPDX-FileCopyrightText: Copyright 2021-2022, 2024-2026 Arm Limited and/or its
+  * affiliates <open-source-office@arm.com>
+  * SPDX-License-Identifier: Apache-2.0
+  *
+@@ -34,7 +34,9 @@ extern "C" {
+ #include "hal_display.h"        /* Display interface */
+ #include "hal_audio.h"          /* Audio interface */
+ #include "hal_camera.h"         /* Camera interface */
+-#include "hal_audio_alif.h"     /* Alif AUDIO functions */
++#if defined(HAL_PLATFORM_ALIF)
++#include "hal_audio_alif.h"     /* Alif audio functions */
++#endif
+ 
+ #include <inttypes.h>
+ #include <stdbool.h>
+diff --git a/source/hal/source/components/npu/ethosu_profiler.c b/source/hal/source/components/npu/ethosu_profiler.c
+index f3bb55c5..99d04cc2 100644
+--- a/source/hal/source/components/npu/ethosu_profiler.c
++++ b/source/hal/source/components/npu/ethosu_profiler.c
+@@ -1,5 +1,5 @@
+ /*
+- * SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its affiliates
++ * SPDX-FileCopyrightText: Copyright 2022, 2024-2026 Arm Limited and/or its affiliates
+  * <open-source-office@arm.com>
+  * SPDX-License-Identifier: Apache-2.0
+  *
+@@ -202,8 +202,13 @@ ethosu_pmu_counters ethosu_get_pmu_counters(void)
+     return *counters;
+ }
+ 
+-extern void platform_ethosu_inference_begin(void);
+-extern void platform_ethosu_inference_end(void);
++void __attribute__((weak)) platform_ethosu_inference_begin(void)
++{
++}
++
++void __attribute__((weak)) platform_ethosu_inference_end(void)
++{
++}
+ 
+ void ethosu_inference_begin(struct ethosu_driver* drv, void* userArg)
+ {
+diff --git a/source/hal/source/hal_pmu.c b/source/hal/source/hal_pmu.c
+index 4a54fd9a..872149b2 100644
+--- a/source/hal/source/hal_pmu.c
++++ b/source/hal/source/hal_pmu.c
+@@ -1,5 +1,5 @@
+ /*
+- * SPDX-FileCopyrightText: Copyright 2022 Arm Limited and/or its affiliates <open-source-office@arm.com>
++ * SPDX-FileCopyrightText: Copyright 2022, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+  * SPDX-License-Identifier: Apache-2.0
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -19,12 +19,18 @@
+ 
+ void hal_pmu_init(void)
+ {
++#if defined(HAL_PLATFORM_ALIF)
+     platform_init_counters();
++#else
++    platform_reset_counters();
++#endif
+ }
+ 
+ void hal_pmu_final(void)
+ {
++#if defined(HAL_PLATFORM_ALIF)
+     platform_final_counters();
++#endif
+ }
+ 
+ void hal_pmu_reset(void)
+diff --git a/source/hal/source/platform/mps4/source/platform_drivers.c b/source/hal/source/platform/mps4/source/platform_drivers.c
+index 9a2ace64..b002eeb1 100644
+--- a/source/hal/source/platform/mps4/source/platform_drivers.c
++++ b/source/hal/source/platform/mps4/source/platform_drivers.c
+@@ -1,5 +1,5 @@
+ /*
+- * SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its
++ * SPDX-FileCopyrightText: Copyright 2024-2026 Arm Limited and/or its
+  * affiliates <open-source-office@arm.com>
+  * SPDX-License-Identifier: Apache-2.0
+  *
+@@ -200,7 +200,7 @@ static int verify_platform(void)
+ }
+ 
+ static const struct hdlcd_dev_cfg_t HDLCD_DEV_CFG_S = {
+-    .base = HDLCD_BASE_S,
++    .base = HDLCD_BASE_NS,
+     .polarities = (POLARITIES_DATA_POLARITY_Msk |
+                    POLARITIES_DATAEN_POLARITY_Msk |
+                    POLARITIES_HSYNC_POLARITY_Pos),

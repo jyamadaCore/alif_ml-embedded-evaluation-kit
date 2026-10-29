@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------
-#  SPDX-FileCopyrightText: Copyright 2022, 2024-2025 Arm Limited and/or its
+#  SPDX-FileCopyrightText: Copyright 2022, 2024-2026 Arm Limited and/or its
 #  affiliates <open-source-office@arm.com>
 #  SPDX-License-Identifier: Apache-2.0
 #
@@ -126,9 +126,6 @@ add_subdirectory(${COMPONENTS_DIR}/display ${CMAKE_BINARY_DIR}/display)
 ## Platform component: audio
 add_subdirectory(${COMPONENTS_DIR}/audio_alif ${CMAKE_BINARY_DIR}/audio_alif)
 
-## Platform component: image
-add_subdirectory(${COMPONENTS_DIR}/image ${CMAKE_BINARY_DIR}/image)
-
 ## Platform component: PMU
 add_subdirectory(${COMPONENTS_DIR}/platform_pmu ${CMAKE_BINARY_DIR}/platform_pmu)
 
@@ -158,9 +155,9 @@ target_link_libraries(${PLATFORM_DRIVERS_TARGET} PUBLIC
     platform_pmu
     hal_display_mps3
     hal_audio_static_streams
-    $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,hal_camera_static_images>
+    $<IF:$<BOOL:${FVP_VSI_ENABLED}>,hal_camera_vsi,$<IF:$<BOOL:${ETHERNET_CAMERA_ENABLED}>,hal_camera_ethernet,hal_camera_static_images>>
     audio_stubs
-    $<IF:$<BOOL:${STDOUT_RETARGET}>,stdout_retarget_cmsdk,stdout>)
+    $<$<NOT:$<BOOL:${SEMIHOSTING_ENABLED}>>:stdout_retarget_cmsdk>)
 
 # Set the CPU profiling definition
 if (CPU_PROFILE_ENABLED)

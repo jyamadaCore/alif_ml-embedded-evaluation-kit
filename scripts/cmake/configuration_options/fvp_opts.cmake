@@ -47,6 +47,15 @@ else()
             "${MLEK_DEPENDENCY_ROOT_DIR}/avh"
             PATH)
     endif()
+
+    # For targets that expose a real Ethernet MAC instead of a VSI peripheral
+    # (e.g. this project's Corellium Atlas Corstone-320 configuration, which
+    # has no VSI at all): feed the camera use case over Ethernet instead.
+    # Mutually exclusive with FVP_VSI_ENABLED -- both select a hal_camera
+    # backend in source/hal/source/components/camera/CMakeLists.txt.
+    USER_OPTION(ETHERNET_CAMERA_ENABLED "Feed the camera use case over a raw Ethernet link instead of VSI"
+        OFF
+        BOOL)
 endif()
 
 # Note that if semihosting enabled application is deployed on FVP, additional command-line

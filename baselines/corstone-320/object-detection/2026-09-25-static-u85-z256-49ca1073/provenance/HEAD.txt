@@ -1,0 +1,7 @@
+commit: 49ca1073718f7f2cbb88610d5ca84fd47f2a4017
+short: 49ca1073
+date: 2026-09-21T14:17:38+03:00
+author: AkiMakkonen-AlifSemi <aki.makkonen@alifsemi.com>
+subject: Merge pull request #32 from alifsemi/update_dfp_pre221
+working_tree: dirty (six unstaged tracked files captured in working-tree.patch)
+staged_changes: false
